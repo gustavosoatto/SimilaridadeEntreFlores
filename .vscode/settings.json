@@ -34,5 +34,10 @@
     "**/.vscode/**"
   ],
   "C_Cpp_Runner.useAddressSanitizer": false,
-  "C_Cpp_Runner.showCompilationTime": false
+  "C_Cpp_Runner.showCompilationTime": false,
+  "files.associations": {
+    "fstream": "cpp",
+    "iostream": "cpp",
+    "new": "cpp"
+  }
 }

@@ -5,80 +5,87 @@
 #include <ctime>
 using namespace std;
 
-struct petala
+struct dimensao
 {
     double comprimento = 0.0;
     double largura = 0.0;
-    string especie = " ";
-    double v_grupo = -1;
-    int grupo = -1;
 };
 
-int QuantidadePetalas();
-void CriarPetalas(petala *petal, int T);
+struct classificação
+{
+    double g_valor = -1.0;
+    int g_grupo = -1;
+};
+
+struct petala
+{
+    dimensao dimensao;
+    string especie = " ";
+    classificação grupo;
+};
+
+int QuantidadePetalas(string s_temp);
+void InicializarPetal(petala *petal, string s_temp);
 int Receber_k();
 int Receber_x();
-void CriarArquivo(petala *petal, int T);
+void CriarArquivo(petala *petal, int T, string s_temp);
 
 int main()
 {
     // Declarações
     srand((unsigned int)time(0));
-    int k = 0, x = 1;
-    int *p_tamanho, *p_grupo, T;
+    int k = 0, x = 0, T = 0;
+    double d_euclidiana = 0.0;
+    string s_temp;
 
     // Recebendo quantidade total de linhas pulando o cabeçalho e inicializando o Vetor que armazenará as petalas
-    T = QuantidadePetalas();
-    p_tamanho = &T;
-    petala petal[*p_tamanho];
+    T = QuantidadePetalas(s_temp);
+    petala petal[T];
 
     // Preenchendo o Vetor com os devidos dados da struct 'petala'
-    CriarPetalas(petal, *p_tamanho);
+    InicializarPetal(petal, s_temp);
 
     // Recebendo o valor de 'k', quantidade de grupos que as 'Struct' do 'Vetor' serão classificadas
     k = Receber_k();
-    p_grupo = &k;
-    petala grupo[*p_grupo];
+    dimensao grupo[k];
+
+    // Elege um representante 'k' vezes
+    for (int i_2 = 0; i_2 < k; i_2++)
+    {
+        int repre = rand() % T;
+        grupo[i_2].comprimento = petal[repre].dimensao.comprimento;
+        grupo[i_2].largura = petal[repre].dimensao.largura;
+    }
 
     // Recebendo o valor de 'x', quantidade de vezes que os grupos serão re-classificados
     x = Receber_x();
     for (int i_1 = 0; i_1 < x; i_1++)
     {
-
-        // Elege um representante 'k' vezes
-        for (int i_2 = 0; i_2 < *p_grupo; i_2++)
-        {
-            int repre = rand() % *p_tamanho;
-            grupo[i_2] = petal[repre];
-        }
-
         // Para cada um dos termos do Vetor, classifica e reclassifica 'k' vezes nos grupos
-        for (int i_2 = 0; i_2 < *p_tamanho; i_2++)
+        for (int i_2 = 0; i_2 < T; i_2++)
         {
-            for (int i_3 = 0; i_3 < *p_grupo; i_3++)
+            for (int i_3 = 0; i_3 < k; i_3++)
             {
                 // Calcula a distância euclidiana e classifica em grupos
-                double z = hypot(petal[i_2].comprimento - grupo[i_3].comprimento, petal[i_2].largura - grupo[i_3].largura);
-                if (petal[i_2].v_grupo >= z || petal[i_2].v_grupo < 0)
+                d_euclidiana = hypot(petal[i_2].dimensao.comprimento - grupo[i_3].comprimento, petal[i_2].dimensao.largura - grupo[i_3].largura);
+                if (petal[i_2].grupo.g_valor >= d_euclidiana || petal[i_2].grupo.g_valor < 0.0)
                 {
-                    petal[i_2].v_grupo = z;
-                    petal[i_2].grupo = i_3;
-                    grupo[i_3].comprimento = petal[i_2].comprimento;
-                    grupo[i_3].largura = petal[i_2].largura;
-                    grupo[i_3].especie = petal[i_2].especie;
-                    grupo[i_3].v_grupo = petal[i_2].v_grupo;
-                    grupo[i_3].grupo = petal[i_2].grupo;
+                    petal[i_2].grupo.g_valor = d_euclidiana;
+                    petal[i_2].grupo.g_grupo = i_3;
+                    // grupo[i_3].comprimento = petal[i_2].dimensao.comprimento;
+                    // grupo[i_3].largura = petal[i_2].dimensao.largura;
                 }
             }
         }
     }
-    CriarArquivo(petal, *p_tamanho);
+
+    // Cria o arquivo './SimilaridadePetalas.csv'
+    CriarArquivo(petal, T, s_temp);
     return 0;
 }
 
-int QuantidadePetalas()
+int QuantidadePetalas(string s_temp)
 {
-    string s_temp;
     int T = 0;
 
     ifstream ReceberPetalas("./iris_petalas.csv", ios::in);
@@ -89,10 +96,10 @@ int QuantidadePetalas()
     return T;
 }
 
-void CriarPetalas(petala *petal, int T)
+void InicializarPetal(petala *petal, string s_temp)
 {
     int length, first, last, i = 0;
-    string s_temp, temp;
+    string temp;
 
     ifstream ReceberPetalas("./iris_petalas.csv", ios::in);
     getline(ReceberPetalas, s_temp);
@@ -103,9 +110,9 @@ void CriarPetalas(petala *petal, int T)
         last = s_temp.find(',', first + 1);
 
         temp = s_temp.substr(0, first);
-        petal[i].comprimento = stod(temp);
+        petal[i].dimensao.comprimento = stod(temp);
         temp = s_temp.substr(first + 1, last - first - 1);
-        petal[i].largura = stod(temp);
+        petal[i].dimensao.largura = stod(temp);
         temp = s_temp.substr(last + 1, length - last - 1);
         petal[i].especie = temp;
         i++;
@@ -141,20 +148,17 @@ int Receber_x()
     return x;
 }
 
-void CriarArquivo(petala *petal, int T)
+void CriarArquivo(petala *petal, int T, string s_temp)
 {
-    string s_temp;
     ofstream EscreverPetalas;
     ifstream ReceberPetalas;
 
-    EscreverPetalas.open("./SimilaridadeFlores.csv", ios::out);
+    EscreverPetalas.open("./SimilaridadePetalas.csv", ios::out);
     ReceberPetalas.open("./iris_petalas.csv", ios::in);
     getline(ReceberPetalas, s_temp);
-    EscreverPetalas << s_temp << ",\"Grupo\"\n";
+    EscreverPetalas << s_temp << ",\"group\"\n";
     for (int i = 0; i < T; i++)
-    {
-        EscreverPetalas << petal[i].comprimento << "," << petal[i].largura << "," << petal[i].especie << "," << petal[i].grupo << "\n";
-    }
+        EscreverPetalas << petal[i].dimensao.comprimento << "," << petal[i].dimensao.largura << "," << petal[i].especie << "," << petal[i].grupo.g_grupo << "\n";
     ReceberPetalas.close();
     EscreverPetalas.close();
 }
