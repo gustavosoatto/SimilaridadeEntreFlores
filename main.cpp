@@ -9,6 +9,7 @@ struct dimensao
 {
     double comprimento = 0.0;
     double largura = 0.0;
+    int count = 0;
 };
 
 struct classificação
@@ -28,6 +29,7 @@ int QuantidadePetalas(string s_temp);
 void InicializarPetal(petala *petal, string s_temp);
 int Receber_k();
 int Receber_x();
+void Media_NovoRepresentante(int k, int T, petala *petal, dimensao *grupo);
 void CriarArquivo(petala *petal, int T, string s_temp);
 
 int main()
@@ -55,6 +57,7 @@ int main()
         int repre = rand() % T;
         grupo[i_2].comprimento = petal[repre].dimensao.comprimento;
         grupo[i_2].largura = petal[repre].dimensao.largura;
+        grupo[i_2].count = repre;
     }
 
     // Recebendo o valor de 'x', quantidade de vezes que os grupos serão re-classificados
@@ -77,6 +80,7 @@ int main()
                 }
             }
         }
+        Media_NovoRepresentante(k, T, petal, grupo);
     }
 
     // Cria o arquivo './SimilaridadePetalas.csv'
@@ -148,6 +152,59 @@ int Receber_x()
     return x;
 }
 
+void Media_NovoRepresentante(int k, int T, petala *petal, dimensao *grupo)
+{
+    double valormedio[k];
+    double distPetalaVM[T];
+    double auxiliar[k];
+    // int pos[k];
+
+    for (int i_4 = 0; i_4 < k; i_4++)
+    {
+        // pos[i_4] = grupo[i_4].count + 2;
+        for (int i_5 = 0; i_5 < T; i_5++)
+        {
+            if (petal[i_5].grupo.g_grupo == i_4)
+            {
+                grupo[i_4].count++;
+                valormedio[i_4] = valormedio[i_4] + petal[i_5].grupo.g_valor;
+            }
+        }
+        valormedio[i_4] = valormedio[i_4] / grupo[i_4].count;
+        for (int i_5 = 0; i_5 < T; i_5++)
+        {
+            if (petal[i_5].grupo.g_grupo == i_4)
+            {
+                distPetalaVM[i_5] = hypot(valormedio[i_4] - petal[i_5].grupo.g_valor, 0.0);
+            }
+        }
+        auxiliar[i_4] = distPetalaVM[i_4];
+        for (int i_5 = 0; i_5 < T; i_5++)
+        {
+            if (petal[i_5].grupo.g_grupo == i_4)
+            {
+                if (distPetalaVM[i_5] < auxiliar[i_4])
+                {
+                    grupo[i_4].comprimento = petal[i_5].dimensao.comprimento;
+                    grupo[i_4].largura = petal[i_5].dimensao.largura;
+                    // pos[i_4] = i_5 + 2;
+                }
+            }
+        }
+        grupo[i_4].count = 0;
+
+        // cout << grupo[i_4].count << " :Quantidade de membros do Grupo" << endl;
+        // cout << valormedio[i_4] << " :Media de cada Grupo" << endl;
+        // cout << distPetalaVM[i_4] << " :Distancia da petala para o representante" << endl;
+        // cout << auxiliar[i_4] << " :Novo representante" << endl;
+        // cout << pos[i_4] << " :Posicao do Representante" << endl;
+        // cout << grupo[i_4].comprimento << endl;
+        // cout << grupo[i_4].largura << endl;
+        // cout << endl;
+    }
+    // cout << "------------------------------------------------------------------" << endl;
+}
+
 void CriarArquivo(petala *petal, int T, string s_temp)
 {
     ofstream EscreverPetalas;
@@ -155,10 +212,12 @@ void CriarArquivo(petala *petal, int T, string s_temp)
 
     EscreverPetalas.open("./SimilaridadePetalas.csv", ios::out);
     ReceberPetalas.open("./iris_petalas.csv", ios::in);
+
     getline(ReceberPetalas, s_temp);
     EscreverPetalas << s_temp << ",\"group\"\n";
     for (int i = 0; i < T; i++)
         EscreverPetalas << petal[i].dimensao.comprimento << "," << petal[i].dimensao.largura << "," << petal[i].especie << "," << petal[i].grupo.g_grupo << "\n";
+
     ReceberPetalas.close();
     EscreverPetalas.close();
 }
