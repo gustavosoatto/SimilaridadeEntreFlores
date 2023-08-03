@@ -75,8 +75,6 @@ int main()
                 {
                     petal[i_2].grupo.g_valor = d_euclidiana;
                     petal[i_2].grupo.g_grupo = i_3;
-                    // grupo[i_3].comprimento = petal[i_2].dimensao.comprimento;
-                    // grupo[i_3].largura = petal[i_2].dimensao.largura;
                 }
             }
         }
@@ -157,12 +155,13 @@ void Media_NovoRepresentante(int k, int T, petala *petal, dimensao *grupo)
     double valormedio[k];
     double distPetalaVM[T];
     double auxiliar[k];
+    int i_4, i_5;
     // int pos[k];
 
-    for (int i_4 = 0; i_4 < k; i_4++)
+    for (i_4 = 0; i_4 < k; i_4++)
     {
         // pos[i_4] = grupo[i_4].count + 2;
-        for (int i_5 = 0; i_5 < T; i_5++)
+        for (i_5 = 0; i_5 < T; i_5++)
         {
             if (petal[i_5].grupo.g_grupo == i_4)
             {
@@ -170,16 +169,24 @@ void Media_NovoRepresentante(int k, int T, petala *petal, dimensao *grupo)
                 valormedio[i_4] = valormedio[i_4] + petal[i_5].grupo.g_valor;
             }
         }
+
         valormedio[i_4] = valormedio[i_4] / grupo[i_4].count;
-        for (int i_5 = 0; i_5 < T; i_5++)
+        for (i_5 = 0; i_5 < T; i_5++)
         {
             if (petal[i_5].grupo.g_grupo == i_4)
             {
                 distPetalaVM[i_5] = hypot(valormedio[i_4] - petal[i_5].grupo.g_valor, 0.0);
             }
         }
-        auxiliar[i_4] = distPetalaVM[i_4];
-        for (int i_5 = 0; i_5 < T; i_5++)
+
+        i_5 = 0;
+        while (petal[i_5].grupo.g_grupo != i_4)
+        {
+            auxiliar[i_4] = distPetalaVM[i_5];
+            i_5++;
+        }
+
+        for (i_5 = 0; i_5 < T; i_5++)
         {
             if (petal[i_5].grupo.g_grupo == i_4)
             {
@@ -187,7 +194,6 @@ void Media_NovoRepresentante(int k, int T, petala *petal, dimensao *grupo)
                 {
                     grupo[i_4].comprimento = petal[i_5].dimensao.comprimento;
                     grupo[i_4].largura = petal[i_5].dimensao.largura;
-                    // pos[i_4] = i_5 + 2;
                 }
             }
         }
